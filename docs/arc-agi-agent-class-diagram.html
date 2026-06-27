@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARC-AGI Agent Class Diagram</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --paper: #ffffff;
+      --ink: #17202a;
+      --muted: #5b6675;
+      --line: #d7dde5;
+      --core: #0f766e;
+      --agent: #1d4ed8;
+      --external: #7c3aed;
+      --data: #b45309;
+      --record: #0f6a3f;
+      --code: #eef2f7;
+      --shadow: 0 12px 28px rgba(31, 42, 56, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    code {
+      background: var(--code);
+      border: 1px solid #dce3ec;
+      border-radius: 5px;
+      padding: 0.08rem 0.28rem;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    a {
+      color: var(--core);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    header {
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+      padding: 34px clamp(18px, 5vw, 72px);
+    }
+
+    header h1 {
+      max-width: 1100px;
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.8rem);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    header p {
+      max-width: 900px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 0;
+      min-height: calc(100vh - 220px);
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      background: #fff;
+      border-right: 1px solid var(--line);
+      padding: 20px;
+    }
+
+    nav a {
+      display: block;
+      border-radius: 6px;
+      color: #2f3a49;
+      padding: 8px 10px;
+      margin: 3px 0;
+      font-size: 0.94rem;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background: #e8f4f2;
+      color: #0b5f59;
+      text-decoration: none;
+    }
+
+    .legend {
+      margin-top: 22px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+
+    .legend h2 {
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      margin: 0 0 10px;
+      text-transform: uppercase;
+    }
+
+    .key {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 7px 0;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+
+    main {
+      min-width: 0;
+      padding: 28px clamp(16px, 4vw, 54px) 64px;
+    }
+
+    section {
+      scroll-margin-top: 24px;
+      margin: 0 0 42px;
+    }
+
+    section h2 {
+      margin: 0 0 10px;
+      font-size: clamp(1.45rem, 3vw, 2.35rem);
+      letter-spacing: 0;
+    }
+
+    section > p {
+      max-width: 980px;
+      color: var(--muted);
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-top: 16px;
+      min-width: 0;
+    }
+
+    .diagram {
+      display: grid;
+      gap: 18px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .layer {
+      min-width: 980px;
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .layer-title {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f0f3f7;
+      color: #2f3a49;
+      padding: 14px;
+      font-weight: 700;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .class-card {
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--core);
+      border-radius: 8px;
+      background: #fff;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .class-card.agent {
+      border-top-color: var(--agent);
+    }
+
+    .class-card.external {
+      border-top-color: var(--external);
+    }
+
+    .class-card.data {
+      border-top-color: var(--data);
+    }
+
+    .class-card.record {
+      border-top-color: var(--record);
+    }
+
+    .class-head {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 12px;
+      font-weight: 800;
+    }
+
+    .class-body {
+      padding: 10px 12px 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .class-body ul {
+      padding-left: 18px;
+      margin: 8px 0 0;
+    }
+
+    .arrow-row {
+      min-width: 980px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .arrow {
+      height: 2px;
+      background: var(--line);
+      position: relative;
+    }
+
+    .arrow::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid var(--line);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    .flow {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 42px minmax(180px, 270px) minmax(0, 1fr);
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .num {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: #e8f4f2;
+      color: #0b5f59;
+      font-weight: 800;
+    }
+
+    .flow-name,
+    .flow-detail {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+    }
+
+    .flow-name {
+      font-weight: 800;
+    }
+
+    .flow-detail {
+      color: var(--muted);
+    }
+
+    .tabs {
+      margin-top: 16px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: #263241;
+      cursor: pointer;
+      font: inherit;
+      padding: 8px 11px;
+    }
+
+    button:hover,
+    button.active {
+      border-color: #8fc4be;
+      background: #e8f4f2;
+      color: #0b5f59;
+    }
+
+    .tab-panel {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .note {
+      grid-column: span 4;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+      color: var(--muted);
+      min-width: 0;
+    }
+
+    .note h3 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 1rem;
+    }
+
+    .wide {
+      grid-column: span 6;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .codebox {
+      background: #101820;
+      color: #dce7f3;
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.88rem;
+      margin-top: 12px;
+      white-space: pre;
+    }
+
+    .refs {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .callout {
+      border-left: 4px solid var(--data);
+      background: #fff8eb;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin-top: 16px;
+      color: #51330c;
+    }
+
+    table {
+      width: 100%;
+      min-width: 840px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f0f3f7;
+      color: #2f3a49;
+      font-size: 0.88rem;
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      margin-top: 44px;
+      padding-top: 18px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 960px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        position: static;
+        height: auto;
+      }
+
+      nav a {
+        display: inline-block;
+      }
+
+      .note,
+      .wide {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 26px 16px;
+      }
+
+      main {
+        padding: 22px 14px 48px;
+      }
+
+      .flow-step {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Class Diagram for Agent, arc_agi, and arcengine Data Flow</h1>
+    <p>
+      This diagram narrows the repo to the classes used by <code>Agent</code>, plus the two policy families
+      you asked about: <code>Random</code> and <code>LLM</code>. The main boundary is between runtime frames
+      in <code>FrameDataRaw</code> and serializable frames in <code>FrameData</code>.
+    </p>
+  </header>
+
+  <div class="shell">
+    <nav aria-label="Page navigation">
+      <a href="#class-diagram">Class Diagram</a>
+      <a href="#conversion-flow">Conversion Flow</a>
+      <a href="#actions">Action Model</a>
+      <a href="#policies">Random vs LLM</a>
+      <a href="#recording">Recording</a>
+      <a href="#source-map">Source Map</a>
+      <div class="legend">
+        <h2>Legend</h2>
+        <div class="key"><span class="swatch" style="background: var(--core)"></span><span>Repo core</span></div>
+        <div class="key"><span class="swatch" style="background: var(--agent)"></span><span>Agent policy</span></div>
+        <div class="key"><span class="swatch" style="background: var(--external)"></span><span>arc_agi runtime</span></div>
+        <div class="key"><span class="swatch" style="background: var(--data)"></span><span>arcengine data</span></div>
+        <div class="key"><span class="swatch" style="background: var(--record)"></span><span>Recording support</span></div>
+      </div>
+    </nav>
+
+    <main>
+      <section id="class-diagram">
+        <h2>1. Class Diagram</h2>
+        <p>
+          Read this top to bottom. <code>Swarm</code> creates an <code>Arcade</code>, asks it for an
+          <code>EnvironmentWrapper</code>, injects that wrapper into each <code>Agent</code>, and then
+          the agent subclasses only decide actions.
+        </p>
+        <div class="panel diagram">
+          <div class="layer">
+            <div class="layer-title">Repo orchestration</div>
+            <div class="cards">
+              <article class="class-card">
+                <div class="class-head">Swarm</div>
+                <div class="class-body">
+                  Owns scorecard lifecycle and agent threads.
+                  <ul>
+                    <li><code>_arc: Arcade</code></li>
+                    <li><code>agent_class: Type[Agent]</code></li>
+                    <li><code>open_scorecard()</code></li>
+                    <li><code>close_scorecard()</code></li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card record">
+                <div class="class-head">Recorder</div>
+                <div class="class-body">
+                  Repo JSONL writer used by <code>Agent</code>, not by <code>arc_agi</code> wrapper recording.
+                  <ul>
+                    <li><code>record(dict)</code></li>
+                    <li><code>get()</code></li>
+                    <li><code>list()</code></li>
+                  </ul>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="arrow-row">
+            <span></span><span class="arrow"></span><span>constructs</span><span class="arrow"></span><span>injects env</span><span class="arrow"></span><span></span>
+          </div>
+
+          <div class="layer">
+            <div class="layer-title">arc_agi runtime</div>
+            <div class="cards">
+              <article class="class-card external">
+                <div class="class-head">Arcade</div>
+                <div class="class-body">
+                  Chooses local, remote, or mixed environment mode.
+                  <ul>
+                    <li><code>operation_mode</code></li>
+                    <li><code>make(game_id)</code></li>
+                    <li><code>open_scorecard()</code></li>
+                    <li><code>close_scorecard()</code></li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card external">
+                <div class="class-head">EnvironmentWrapper</div>
+                <div class="class-body">
+                  Abstract wrapper used by repo <code>Agent</code>.
+                  <ul>
+                    <li><code>observation_space</code></li>
+                    <li><code>step(action, data, reasoning)</code></li>
+                    <li><code>_set_last_response()</code></li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card external">
+                <div class="class-head">RemoteEnvironmentWrapper</div>
+                <div class="class-body">
+                  Online implementation. Converts API JSON into <code>FrameDataRaw</code>.
+                  <ul>
+                    <li><code>reset()</code></li>
+                    <li><code>step()</code></li>
+                    <li><code>_convert_to_frame_data_raw()</code></li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card external">
+                <div class="class-head">LocalEnvironmentWrapper</div>
+                <div class="class-body">
+                  Local implementation returned by <code>Arcade.make()</code> in normal/offline local paths.
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="arrow-row">
+            <span></span><span class="arrow"></span><span>returns</span><span class="arrow"></span><span>FrameDataRaw</span><span class="arrow"></span><span></span>
+          </div>
+
+          <div class="layer">
+            <div class="layer-title">Repo agent core</div>
+            <div class="cards">
+              <article class="class-card">
+                <div class="class-head">Agent</div>
+                <div class="class-body">
+                  Base lifecycle and conversion point.
+                  <ul>
+                    <li><code>arc_env: EnvironmentWrapper</code></li>
+                    <li><code>frames: list[FrameData]</code></li>
+                    <li><code>main()</code></li>
+                    <li><code>_convert_raw_frame_data()</code></li>
+                    <li><code>do_action_request()</code></li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card agent">
+                <div class="class-head">Random</div>
+                <div class="class-body">
+                  Minimal policy subclass.
+                  <ul>
+                    <li><code>is_done()</code></li>
+                    <li><code>choose_action()</code></li>
+                    <li>sets RNG reasoning</li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card agent">
+                <div class="class-head">LLM</div>
+                <div class="class-body">
+                  Chat/tool policy subclass.
+                  <ul>
+                    <li><code>messages</code></li>
+                    <li><code>build_functions()</code></li>
+                    <li><code>build_tools()</code></li>
+                    <li><code>choose_action()</code></li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card agent">
+                <div class="class-head">LLM variants</div>
+                <div class="class-body">
+                  Same interface, different prompt/model behavior.
+                  <ul>
+                    <li><code>FastLLM</code></li>
+                    <li><code>ReasoningLLM</code></li>
+                    <li><code>GuidedLLM</code></li>
+                  </ul>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="arrow-row">
+            <span></span><span class="arrow"></span><span>uses</span><span class="arrow"></span><span>models</span><span class="arrow"></span><span></span>
+          </div>
+
+          <div class="layer">
+            <div class="layer-title">arcengine data</div>
+            <div class="cards">
+              <article class="class-card data">
+                <div class="class-head">FrameDataRaw</div>
+                <div class="class-body">
+                  Runtime frame. Stores frame layers as NumPy arrays in private attr.
+                  <ul>
+                    <li><code>frame: list[ndarray]</code></li>
+                    <li><code>action_input</code></li>
+                    <li>not directly JSON-oriented</li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card data">
+                <div class="class-head">FrameData</div>
+                <div class="class-body">
+                  Serializable frame used by repo memory and recordings.
+                  <ul>
+                    <li><code>frame: list[list[list[int]]]</code></li>
+                    <li><code>action_input</code></li>
+                    <li><code>model_dump_json()</code></li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card data">
+                <div class="class-head">GameAction</div>
+                <div class="class-body">
+                  Enum with attached input model.
+                  <ul>
+                    <li><code>RESET..ACTION7</code></li>
+                    <li><code>action_data</code></li>
+                    <li><code>set_data()</code></li>
+                  </ul>
+                </div>
+              </article>
+              <article class="class-card data">
+                <div class="class-head">ActionInput</div>
+                <div class="class-body">
+                  Echoed action payload in frames.
+                  <ul>
+                    <li><code>id: GameAction</code></li>
+                    <li><code>data: dict</code></li>
+                    <li><code>reasoning: Any</code></li>
+                  </ul>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="conversion-flow">
+        <h2>2. Frame Conversion Flow</h2>
+        <p>
+          There are two frame shapes because the environment wants efficient arrays, while the repo wants
+          JSON-safe objects for history, recording, prompts, and playback.
+        </p>
+        <div class="panel">
+          <div class="flow">
+            <div class="flow-step">
+              <div class="num">1</div>
+              <div class="flow-name">Environment returns <code>FrameDataRaw</code></div>
+              <div class="flow-detail">
+                <code>EnvironmentWrapper.observation_space</code>, <code>reset()</code>, and <code>step()</code>
+                expose raw frames. Raw frame layers are NumPy arrays.
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="num">2</div>
+              <div class="flow-name">Agent converts raw to safe</div>
+              <div class="flow-detail">
+                <code>Agent._convert_raw_frame_data()</code> creates <code>FrameData</code> and does
+                <code>frame=[arr.tolist() for arr in raw.frame]</code>. It also preserves
+                <code>raw.action_input</code>, <code>guid</code>, state, score, and available actions.
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="num">3</div>
+              <div class="flow-name">Agent policy reads <code>FrameData</code></div>
+              <div class="flow-detail">
+                <code>Random.choose_action()</code> checks state. <code>LLM.choose_action()</code> uses
+                state, score, frame text, and previous <code>action_input</code> to build function/tool responses.
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="num">4</div>
+              <div class="flow-name">Policy returns <code>GameAction</code></div>
+              <div class="flow-detail">
+                The action may include <code>action.action_data</code> and a dynamic
+                <code>action.reasoning</code> attribute. The base agent pulls both before stepping the environment.
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="num">5</div>
+              <div class="flow-name">Environment step accepts action</div>
+              <div class="flow-detail">
+                <code>Agent.do_action_request()</code> calls
+                <code>arc_env.step(action, data=action.action_data.model_dump(), reasoning=reasoning)</code>.
+                The wrapper/API returns the next <code>FrameDataRaw</code>.
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="num">6</div>
+              <div class="flow-name">Recorder writes <code>FrameData</code></div>
+              <div class="flow-detail">
+                <code>Agent.append_frame()</code> records <code>json.loads(frame.model_dump_json())</code>.
+                This is why preserving <code>action_input</code> during conversion matters.
+              </div>
+            </div>
+          </div>
+          <div class="codebox">FrameDataRaw.frame: list[numpy.ndarray]
+      |
+      | Agent._convert_raw_frame_data()
+      v
+FrameData.frame: list[list[list[int]]]
+FrameData.action_input: ActionInput(id, data, reasoning)
+      |
+      | frame.model_dump_json() -> json.loads(...)
+      v
+Recorder JSONL event</div>
+        </div>
+      </section>
+
+      <section id="actions">
+        <h2>3. Action Model</h2>
+        <p>
+          <code>GameAction</code> is an enum, but each enum member also carries an action input model.
+          That means agents do not return a plain string; they return an enum object that can be populated
+          with data.
+        </p>
+        <div class="grid">
+          <article class="note">
+            <h3>SimpleAction</h3>
+            <p>Used by <code>RESET</code>, <code>ACTION1</code> through <code>ACTION5</code>, and <code>ACTION7</code>. It only carries <code>game_id</code>.</p>
+          </article>
+          <article class="note">
+            <h3>ComplexAction</h3>
+            <p>Used by <code>ACTION6</code>. It carries <code>game_id</code>, <code>x</code>, and <code>y</code>, with coordinates constrained to 0..63.</p>
+          </article>
+          <article class="note">
+            <h3>Reasoning</h3>
+            <p>Not part of <code>action_data</code>. Agents attach <code>action.reasoning</code>; <code>Agent.do_action_request()</code> forwards it separately.</p>
+          </article>
+        </div>
+        <div class="callout">
+          <code>ActionInput</code> is what comes back inside a frame. It describes the action that produced
+          that frame: action id, data payload, and reasoning blob.
+        </div>
+      </section>
+
+      <section id="policies">
+        <h2>4. Random vs LLM Policies</h2>
+        <p>
+          These two classes share the same base lifecycle. The difference is only how they fill the
+          <code>choose_action()</code> contract.
+        </p>
+        <div class="tabs" data-tabs>
+          <div class="tab-buttons" role="tablist" aria-label="Agent policies">
+            <button class="active" type="button" data-tab="random-panel">Random</button>
+            <button type="button" data-tab="llm-panel">LLM</button>
+            <button type="button" data-tab="shared-panel">Shared Contract</button>
+          </div>
+          <div id="random-panel" class="tab-panel active">
+            <div class="codebox">Random.choose_action(frames, latest_frame)
+  if latest_frame.state in [NOT_PLAYED, GAME_OVER]:
+      action = GameAction.RESET
+  else:
+      action = random non-RESET GameAction
+
+  if simple:
+      action.reasoning = "RNG told me..."
+  if complex:
+      action.set_data({"x": random 0..63, "y": random 0..63})
+      action.reasoning = {"desired_action": ..., "my_reason": ...}</div>
+          </div>
+          <div id="llm-panel" class="tab-panel">
+            <div class="codebox">LLM.choose_action(frames, latest_frame)
+  first turn:
+      synthesize RESET function/tool call
+      return GameAction.RESET
+
+  later turns:
+      push previous action result using latest_frame.action_input
+      optionally ask model for observation text
+      expose GameAction schema as functions/tools
+      parse selected function/tool name + JSON arguments
+      action = GameAction.from_name(name)
+      action.set_data(arguments)
+      return action</div>
+          </div>
+          <div id="shared-panel" class="tab-panel">
+            <p>
+              Both classes return <code>GameAction</code>. Neither class writes frames, calls scorecards,
+              manages threads, or serializes recordings directly. Those responsibilities stay in
+              <code>Agent</code>, <code>Swarm</code>, and <code>Recorder</code>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="recording">
+        <h2>5. Recording Boundaries</h2>
+        <p>
+          There are two recording ideas in play. The repo-level recorder is the one you inspect in
+          <code>recordings/*.recording.jsonl</code>. The <code>arc_agi</code> wrapper also has optional recording,
+          but this repo creates its own <code>Recorder</code> in <code>Agent.start_recording()</code>.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Recorder</th>
+                <th>Owner</th>
+                <th>What it writes</th>
+                <th>Why action conversion matters</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>agents.recorder.Recorder</code></td>
+                <td><code>Agent.append_frame()</code>, LLM token hooks, cleanup</td>
+                <td>JSONL events in <code>RECORDINGS_DIR</code>; frame events are serialized <code>FrameData</code>.</td>
+                <td>Playback filters recorded events where <code>data.action_input</code> exists.</td>
+              </tr>
+              <tr>
+                <td><code>arc_agi.EnvironmentWrapper._record()</code></td>
+                <td><code>EnvironmentWrapper._set_last_response()</code></td>
+                <td>Optional wrapper-level JSONL if <code>save_recording=True</code> is passed to <code>Arcade.make()</code>.</td>
+                <td>This repo usually relies on its own recorder instead.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="source-map">
+        <h2>6. Source Map</h2>
+        <div class="grid">
+          <article class="note wide">
+            <h3>Repo core</h3>
+            <p><code>agents/agent.py</code>: base lifecycle, raw-to-safe frame conversion, action submission, recording, playback.</p>
+            <p><code>agents/swarm.py</code>: creates <code>Arcade</code>, opens scorecards, constructs agents with <code>arc_env</code>.</p>
+            <p><code>agents/recorder.py</code>: JSONL writer/reader used by repo recordings.</p>
+          </article>
+          <article class="note wide">
+            <h3>Policy classes</h3>
+            <p><code>agents/templates/random_agent.py</code>: minimal policy that returns random <code>GameAction</code>s.</p>
+            <p><code>agents/templates/llm_agents.py</code>: LLM policy that maps frame context to OpenAI functions/tools, then back to <code>GameAction</code>.</p>
+          </article>
+          <article class="note wide">
+            <h3>External package classes</h3>
+            <p><code>arc_agi/base.py</code>: <code>Arcade</code>, <code>OperationMode</code>, scorecard operations, environment creation.</p>
+            <p><code>arc_agi/wrapper.py</code>: <code>EnvironmentWrapper</code> base class and <code>observation_space</code>.</p>
+            <p><code>arc_agi/remote_wrapper.py</code>: API <code>reset()</code>/<code>step()</code> and API JSON to <code>FrameDataRaw</code>.</p>
+          </article>
+          <article class="note wide">
+            <h3>Data models</h3>
+            <p><code>arcengine/enums.py</code>: <code>GameAction</code>, <code>SimpleAction</code>, <code>ComplexAction</code>, <code>ActionInput</code>, <code>FrameData</code>, <code>FrameDataRaw</code>.</p>
+          </article>
+        </div>
+        <div class="refs">
+          <div>Generated from local source files in this workspace.</div>
+          <div>Focus intentionally excludes OpenCLAW, smolagents, multimodal, and LangGraph templates except where they are imported by registry code.</div>
+        </div>
+      </section>
+
+      <footer>
+        Static class/conversion report for ARC-AGI-3-Agents. Open this file directly in a browser.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const tabGroups = document.querySelectorAll("[data-tabs]");
+    tabGroups.forEach((group) => {
+      const buttons = group.querySelectorAll("[data-tab]");
+      const panels = group.querySelectorAll(".tab-panel");
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.getAttribute("data-tab");
+          buttons.forEach((b) => b.classList.toggle("active", b === button));
+          panels.forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        });
+      });
+    });
+
+    const links = Array.from(document.querySelectorAll("nav a"));
+    const sections = links
+      .map((link) => document.querySelector(link.getAttribute("href")))
+      .filter(Boolean);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        links.forEach((link) => {
+          link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id);
+        });
+      });
+    }, { rootMargin: "-20% 0px -65% 0px", threshold: 0.01 });
+    sections.forEach((section) => observer.observe(section));
+  </script>
+</body>
+</html>
