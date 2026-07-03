@@ -533,8 +533,8 @@ class GuidedLLMls20(LLM, Agent):
             },
             "agent_type": "guided_llm",
             "game_rules": "locksmith",
-            "response_preview": self._last_response_content[:200] + "..."
-            if len(self._last_response_content) > 200
+            "response_preview": self._last_response_content[:2000] + "..."
+            if len(self._last_response_content) > 2000
             else self._last_response_content,
         }
 
