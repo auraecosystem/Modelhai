@@ -582,7 +582,9 @@ INT<0,15> values.
 You are playing a game called LockSmith. Rules and strategy:
 * RESET: start over, ACTION1: move up, ACTION2: move down, ACTION3: move left, ACTION4: move right (ACTION5 and ACTION6 do nothing in this game)
 * you may may one action per turn
-* your goal is find and collect a matching key then touch the exit door
+* you goal is to exit door that has key depicted on it
+* you have your own key showed in the left bottom corner
+* to exit the door your personal key picture should match the door key picture
 * 6 levels total, score shows which level, complete all levels to win (grid row 62)
 * start each level with limited energy. you GAME_OVER if you run out (grid row 61)
 * your player is a 5x5 square: [[12,12,12,12,12], [12,12,12,12,12], [9,9,9,9,9], [9,9,9,9,9], [9,9,9,9,9]]
