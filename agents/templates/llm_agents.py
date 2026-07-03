@@ -492,13 +492,15 @@ Call exactly one action.
         """.format()
         )
 
-
-class GuidedLLM(LLM, Agent):
+class GuidedLLMls20(LLM, Agent):
     """Similar to LLM, with explicit human-provided rules in the user prompt to increase success rate."""
 
     MAX_ACTIONS = 10
     DO_OBSERVATION = True
+    #MODEL = "o3"
+    #MODEL = "gpt-5.4" # Function tools with reasoning_effort are not supported for gpt-5.4 in /v1/chat/completions. Please use /v1/responses instead.', 'type': 'invalid_request_error
     MODEL = "gpt-5.2"
+    print(f"*******************Using model: {MODEL}")
     MODEL_REQUIRES_TOOLS = True
     MESSAGE_LIMIT = 10
     REASONING_EFFORT = "high"
@@ -583,52 +585,21 @@ You are playing a game called LockSmith. Rules and strategy:
 * your goal is find and collect a matching key then touch the exit door
 * 6 levels total, score shows which level, complete all levels to win (grid row 62)
 * start each level with limited energy. you GAME_OVER if you run out (grid row 61)
-* the player is a 4x4 square: [[X,X,X,X],[0,0,0,X],[4,4,4,X],[4,4,4,X]] where X is transparent to the background
+* your player is a 5x5 square: [[12,12,12,12,12], [12,12,12,12,12], [9,9,9,9,9], [9,9,9,9,9], [9,9,9,9,9]]
 * the grid represents a birds-eye view of the level
-* walls are made of INT<10>, you cannot move through a wall
-* walkable floor area is INT<8>
-* you can refill energy by touching energy pills (a 2x2 of INT<6>)
+* walls are made of INT<4>, you cannot move through a wall
+* walkable floor area is INT<3>
 * current key is shown in bottom-left of entire grid
-* the exit door is a 4x4 square with INT<11> border
-* to find a new key shape, touch the key rotator, a 4x4 square denoted by INT<9> and INT<4> in the top-left corner of the square
-* to find a new key color, touch the color rotator, a 4x4 square denoted by INT<9> and INT<2> and in the bottom-left corner of the square
-* to rotate more than once, move 1 space away from the rotator and back on
+* the exit door is a 9x9 square with INT<5> interior
+* to find a new key shape, touch the key rotator, a 4x4 plus sign denoted by INT<0> and INT<1> 
+* if the key shape in the bottom left corner matches the exit door, avoid the key rotator and move towards the exit door
+* if the shape doesn't match, rotate more than once, move 1 space away from the rotator and back on
 * continue rotating the shape and color of the key until the key matches the one inside the exit door (scaled down 2X)
 * if the grid does not change after an action, you probably tried to move into a wall
 
 An example of a good strategy observation:
-The player 4x4 made of INT<4> and INT<0> is standing below a wall of INT<10>, so I cannot move up anymore and should
-move left towards the rotator with INT<11>.
-
-# TURN:
-Call exactly one action.
-        """.format()
-        )
-
-
-# Example of a custom LLM agent
-class MyCustomLLM(LLM):
-    """Template for creating your own custom LLM agent."""
-
-    MAX_ACTIONS = 10
-    MODEL = "gpt-4o-mini"
-    DO_OBSERVATION = True
-
-    def build_user_prompt(self, latest_frame: FrameData) -> str:
-        """Customize this method to provide instructions to the LLM."""
-        return textwrap.dedent(
-            """
-# CONTEXT:
-You are an agent playing a dynamic game. Your objective is to
-WIN and avoid GAME_OVER while minimizing actions.
-
-One action produces one Frame. One Frame is made of one or more sequential
-Grids. Each Grid is a matrix size INT<0,63> by INT<0,63> filled with
-INT<0,15> values.
-
-# CUSTOM INSTRUCTIONS:
-Add your game instructions and strategy here.
-For example, explain the game rules, objectives, and optimal strategies.
+The player 5x5 made of INT<12> and INT<9> is standing by a wall of INT<4>, so I cannot move up anymore and should
+move towards the rotator with a good choice of action.
 
 # TURN:
 Call exactly one action.
