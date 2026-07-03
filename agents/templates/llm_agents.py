@@ -16,7 +16,7 @@ logger = logging.getLogger()
 class LLM(Agent):
     """An agent that uses a base LLM model to play games."""
 
-    MAX_ACTIONS: int = 80
+    MAX_ACTIONS: int = 10
     DO_OBSERVATION: bool = True
     REASONING_EFFORT: Optional[str] = None
     MODEL_REQUIRES_TOOLS: bool = False
@@ -403,7 +403,7 @@ Call exactly one action.
 class ReasoningLLM(LLM, Agent):
     """An LLM agent that uses o4-mini and captures reasoning metadata in the action.reasoning field."""
 
-    MAX_ACTIONS = 80
+    MAX_ACTIONS = 10
     DO_OBSERVATION = True
     MODEL_REQUIRES_TOOLS = True
     MODEL = "o4-mini"
@@ -472,7 +472,7 @@ class ReasoningLLM(LLM, Agent):
 class FastLLM(LLM, Agent):
     """Similar to LLM, but skips observations."""
 
-    MAX_ACTIONS = 80
+    MAX_ACTIONS = 10
     DO_OBSERVATION = False
     MODEL = "gpt-4o-mini"
 
@@ -496,9 +496,9 @@ Call exactly one action.
 class GuidedLLM(LLM, Agent):
     """Similar to LLM, with explicit human-provided rules in the user prompt to increase success rate."""
 
-    MAX_ACTIONS = 80
+    MAX_ACTIONS = 10
     DO_OBSERVATION = True
-    MODEL = "o3"
+    MODEL = "gpt-5.2"
     MODEL_REQUIRES_TOOLS = True
     MESSAGE_LIMIT = 10
     REASONING_EFFORT = "high"
@@ -610,7 +610,7 @@ Call exactly one action.
 class MyCustomLLM(LLM):
     """Template for creating your own custom LLM agent."""
 
-    MAX_ACTIONS = 80
+    MAX_ACTIONS = 10
     MODEL = "gpt-4o-mini"
     DO_OBSERVATION = True
 

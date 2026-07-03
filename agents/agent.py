@@ -85,6 +85,8 @@ class Agent(ABC):
                     f"{self.game_id} - {action.name}: count {self.action_counter}, levels completed {frame.levels_completed}, avg fps {self.fps})"
                 )
             self.action_counter += 1
+            print("sleeping....")
+            time.sleep(1)
 
         self.cleanup()
 
