@@ -507,7 +507,6 @@ class GuidedLLMls20(LLM, Agent):
     #MODEL = "o3"
     #MODEL = "gpt-5.4" # Function tools with reasoning_effort are not supported for gpt-5.4 in /v1/chat/completions. Please use /v1/responses instead.', 'type': 'invalid_request_error
     MODEL = "gpt-5.2"
-    print(f"*******************Using model: {MODEL}")
     MODEL_REQUIRES_TOOLS = True
     MESSAGE_LIMIT = 10
     REASONING_EFFORT = "high"
@@ -605,6 +604,8 @@ You are playing a game called LockSmith. Rules and strategy:
 * if the shape doesn't match, rotate more than once, move 1 space away from the rotator and back on
 * continue rotating the shape and color of the key until the key matches the one inside the exit door (scaled down 2X)
 * if the grid does not change after an action, you probably tried to move into a wall
+* You are ON the rotator only if the player block overlaps the rotator tiles in the current frame.
+* Before making decision, reflect if couple of previous steps are moving your closer to the goal.
 
 An example of a good strategy observation:
 The player 5x5 made of INT<12> and INT<9> is standing by a wall of INT<4>, so I cannot move up anymore and should
