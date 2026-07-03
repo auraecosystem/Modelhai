@@ -33,10 +33,16 @@ class LLM(Agent):
         self.messages = []
         self.token_counter = 0
 
+    def _build_client(self) -> OpenAIClient:
+        return OpenAIClient(api_key=os.environ.get("OPENAI_API_KEY", ""))
+
+    def _resolve_model(self) -> str:
+        return self.MODEL
+
     @property
     def name(self) -> str:
         obs = "with-observe" if self.DO_OBSERVATION else "no-observe"
-        sanitized_model_name = self.MODEL.replace("/", "-").replace(":", "-")
+        sanitized_model_name = self._resolve_model().replace("/", "-").replace(":", "-")
         name = f"{super().name}.{sanitized_model_name}.{obs}"
         if self.REASONING_EFFORT:
             name += f".{self.REASONING_EFFORT}"
@@ -60,7 +66,8 @@ class LLM(Agent):
         logging.getLogger("openai").setLevel(logging.CRITICAL)
         logging.getLogger("httpx").setLevel(logging.CRITICAL)
 
-        client = OpenAIClient(api_key=os.environ.get("OPENAI_API_KEY", ""))
+        client = self._build_client()
+        model = self._resolve_model()
 
         functions = self.build_functions()
         tools = self.build_tools()
@@ -116,7 +123,7 @@ class LLM(Agent):
             logger.info("Sending to Assistant for observation...")
             try:
                 create_kwargs = {
-                    "model": self.MODEL,
+                    "model": model,
                     "messages": self.messages,
                 }
                 if self.REASONING_EFFORT is not None:
@@ -148,7 +155,7 @@ class LLM(Agent):
             logger.info("Sending to Assistant for action...")
             try:
                 create_kwargs = {
-                    "model": self.MODEL,
+                    "model": model,
                     "messages": self.messages,
                     "tools": tools,
                     "tool_choice": "required",
@@ -186,7 +193,7 @@ class LLM(Agent):
             logger.info("Sending to Assistant for action...")
             try:
                 create_kwargs = {
-                    "model": self.MODEL,
+                    "model": model,
                     "messages": self.messages,
                     "functions": functions,
                     "function_call": "auto",
@@ -423,7 +430,7 @@ class ReasoningLLM(LLM, Agent):
 
         # Store reasoning metadata in the action.reasoning field
         action.reasoning = {
-            "model": self.MODEL,
+            "model": self._resolve_model(),
             "action_chosen": action.name,
             "reasoning_tokens": self._last_reasoning_tokens,
             "total_reasoning_tokens": self._total_reasoning_tokens,
@@ -465,7 +472,7 @@ class ReasoningLLM(LLM, Agent):
                 )
                 self._total_reasoning_tokens += self._last_reasoning_tokens
                 logger.debug(
-                    f"Captured {self._last_reasoning_tokens} reasoning tokens from {self.MODEL} response"
+                    f"Captured {self._last_reasoning_tokens} reasoning tokens from {self._resolve_model()} response"
                 )
 
 
@@ -520,7 +527,7 @@ class GuidedLLMls20(LLM, Agent):
 
         # Store reasoning metadata in the action.reasoning field
         action.reasoning = {
-            "model": self.MODEL,
+            "model": self._resolve_model(),
             "action_chosen": action.name,
             "reasoning_effort": self.REASONING_EFFORT,
             "reasoning_tokens": self._last_reasoning_tokens,
@@ -565,7 +572,7 @@ class GuidedLLMls20(LLM, Agent):
                 )
                 self._total_reasoning_tokens += self._last_reasoning_tokens
                 logger.debug(
-                    f"Captured {self._last_reasoning_tokens} reasoning tokens from o3 response"
+                    f"Captured {self._last_reasoning_tokens} reasoning tokens from {self._resolve_model()} response"
                 )
 
     def build_user_prompt(self, latest_frame: FrameData) -> str:
@@ -607,3 +614,27 @@ move towards the rotator with a good choice of action.
 Call exactly one action.
         """.format()
         )
+
+
+class GuidedLLMls20OpenRouter(GuidedLLMls20, Agent):
+    """Guided Locksmith agent that routes requests through OpenRouter."""
+
+    OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self._openrouter_api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+        self._openrouter_model = os.environ.get("OPENROUTER_MODEL", "").strip()
+        if not self._openrouter_api_key:
+            raise ValueError("OPENROUTER_API_KEY must be set for GuidedLLMls20OpenRouter")
+        if not self._openrouter_model:
+            raise ValueError("OPENROUTER_MODEL must be set for GuidedLLMls20OpenRouter")
+        super().__init__(*args, **kwargs)
+
+    def _build_client(self) -> OpenAIClient:
+        return OpenAIClient(
+            api_key=self._openrouter_api_key,
+            base_url=self.OPENROUTER_BASE_URL,
+        )
+
+    def _resolve_model(self) -> str:
+        return self._openrouter_model
