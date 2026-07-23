@@ -29,7 +29,7 @@ export ARC_API_KEY="your_api_key_here"
 uv run main.py --agent=random --game=ls20
 ```
 
-For more information, see the [documentation](https://three.arcprize.org/docs#quick-start) or the [tutorial video](https://youtu.be/xEVg9dcJMkw).
+For more information, see the [documentation](https://docs.arcprize.org) or the [tutorial video](https://youtu.be/xEVg9dcJMkw).
 
 ## Changelog
 ## [0.9.3] - 2026-01-29
