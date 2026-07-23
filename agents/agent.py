@@ -69,6 +69,17 @@ class Agent(ABC):
     def main(self) -> None:
         """The main agent loop. Play the game_id until finished, then exits."""
         self.timer = time.time()
+
+        # Record frame 0 (the initial state after reset/environment creation)
+        if hasattr(self, "recorder") and not self.is_playback and len(self.frames) > 0:
+            try:
+                from pydantic import BaseModel
+                frame0 = self.frames[0]
+                if isinstance(frame0, BaseModel):
+                    self.recorder.record(json.loads(frame0.model_dump_json()))
+            except Exception:
+                pass
+
         while (
             not self.is_done(self.frames, self.frames[-1])
             and self.action_counter < self.MAX_ACTIONS
