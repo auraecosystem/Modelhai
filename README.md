@@ -17,7 +17,7 @@ cd ARC-AGI-3-Agents
 cp .env.example .env
 ```
 
-3. Get an API key from the [ARC-AGI-3 Website](https://three.arcprize.org/) and set it as an environment variable in your .env file.
+3. Get an API key from the [ARC-AGI-3 Website](https://arcprize.org/arc-agi/3) and set it as an environment variable in your .env file.
 
 ```bash
 export ARC_API_KEY="your_api_key_here"
