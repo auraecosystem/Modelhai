@@ -71,7 +71,7 @@ class Agent(ABC):
         self.timer = time.time()
         while (
             not self.is_done(self.frames, self.frames[-1])
-            and self.action_counter <= self.MAX_ACTIONS
+            and self.action_counter < self.MAX_ACTIONS
         ):
             action = self.choose_action(
                 self.frames,
