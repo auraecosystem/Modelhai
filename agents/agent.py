@@ -153,6 +153,7 @@ class Agent(ABC):
             guid=raw.guid,
             full_reset=raw.full_reset,
             available_actions=raw.available_actions,
+            action_input=raw.action_input,
         )
         return out
 
