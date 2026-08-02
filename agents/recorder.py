@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -27,6 +28,10 @@ class Recorder:
                 f"{self.prefix}.{self.guid}{RECORDING_SUFFIX}",
             )
         )
+        # Serialises concurrent `record` calls. `json.dump` writes in several
+        # small chunks, so two threads appending to one file can interleave
+        # mid-line and lose or corrupt an event.
+        self._write_lock = threading.Lock()
         # Create directory once during initialization
         if recordings_dir:
             os.makedirs(recordings_dir, exist_ok=True)
@@ -40,9 +45,12 @@ class Recorder:
         event["timestamp"] = datetime.now(timezone.utc).isoformat()
         event["data"] = data
 
-        with open(self.filename, "a", encoding="utf-8") as f:
-            json.dump(event, f)
-            f.write("\n")
+        # One serialised string, one write, under a lock: an interleaved
+        # `json.dump` could drop or corrupt an event under concurrency.
+        line = json.dumps(event) + "\n"
+        with self._write_lock:
+            with open(self.filename, "a", encoding="utf-8") as f:
+                f.write(line)
 
     def get(self) -> list[dict[str, Any]]:
         """
