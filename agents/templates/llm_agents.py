@@ -19,7 +19,11 @@ class LLM(Agent):
     MAX_ACTIONS: int = 80
     DO_OBSERVATION: bool = True
     REASONING_EFFORT: Optional[str] = None
-    MODEL_REQUIRES_TOOLS: bool = False
+    # Current OpenAI models reject the legacy function-calling format
+    # (`function_call` + `{"role": "function"}`) outright, so the legacy path
+    # can no longer be the default. Set to False only for a provider that still
+    # requires the old format.
+    MODEL_REQUIRES_TOOLS: bool = True
 
     MESSAGE_LIMIT: int = 10
     MODEL: str = "gpt-4o-mini"
