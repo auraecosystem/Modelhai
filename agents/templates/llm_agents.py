@@ -13,6 +13,33 @@ from ..agent import Agent
 logger = logging.getLogger()
 
 
+def _coerce_numeric_args(data: Any) -> Any:
+    """Accept integer-valued tool arguments that arrive as strings.
+
+    `GameAction.set_data` validates through pydantic, so an ACTION6 whose
+    `x`/`y` arrive as strings raises `ValidationError` out of `choose_action`
+    and terminates the run. Models emit quoted numbers often enough that this
+    silently truncates some agents' runs and not others.
+
+    Deliberately narrow: only strings that are exactly an integer after
+    stripping whitespace and quote characters are converted. Everything else
+    is passed through untouched, so a genuinely malformed argument still fails
+    loudly rather than being quietly reinterpreted.
+    """
+    if not isinstance(data, dict):
+        return data
+    coerced = {}
+    for key, value in data.items():
+        if isinstance(value, str):
+            try:
+                coerced[key] = int(value.strip().strip("\"'").strip())
+                continue
+            except (TypeError, ValueError):
+                pass
+        coerced[key] = value
+    return coerced
+
+
 class LLM(Agent):
     """An agent that uses a base LLM model to play games."""
 
@@ -217,7 +244,7 @@ class LLM(Agent):
             data = {}
 
         action = GameAction.from_name(action_id)
-        action.set_data(data)
+        action.set_data(_coerce_numeric_args(data))
         return action
 
     def track_tokens(self, tokens: int, message: str = "") -> None:
