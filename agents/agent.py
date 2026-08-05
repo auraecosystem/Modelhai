@@ -71,7 +71,7 @@ class Agent(ABC):
         self.timer = time.time()
         while (
             not self.is_done(self.frames, self.frames[-1])
-            and self.action_counter <= self.MAX_ACTIONS
+            and self.action_counter < self.MAX_ACTIONS
         ):
             action = self.choose_action(
                 self.frames,
@@ -82,7 +82,7 @@ class Agent(ABC):
             if frame := self.take_action(action):
                 self.append_frame(frame)
                 logger.info(
-                    f"{self.game_id} - {action.name}: count {self.action_counter}, levels completed {frame.levels_completed}, avg fps {self.fps})"
+                    f"{self.game_id} - {action.name}: count {self.action_counter + 1}, levels completed {frame.levels_completed}, avg fps {self.fps})"
                 )
             self.action_counter += 1
 
