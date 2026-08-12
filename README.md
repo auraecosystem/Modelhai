@@ -20,13 +20,26 @@ cp .env.example .env
 3. Get an API key from the [ARC-AGI-3 Website](https://three.arcprize.org/) and set it as an environment variable in your .env file.
 
 ```bash
-export ARC_API_KEY="your_api_key_here"
+export ARC_API_KEY="6611b1a63a0952268a3f44fdb724c1f2"
 ```
 
 4. Run the random agent (generates random actions) against the ls20 game.
 
 ```bash
 uv run main.py --agent=random --game=ls20
+```
+```bash
+uv pip install agentops litellm
+```
+
+
+```python
+import agentops
+
+agentops.init(
+    api_key='6c4f8831-9386-4619-a79e-b342d339a733',
+    default_tags=['litellm']
+)
 ```
 
 For more information, see the [documentation](https://three.arcprize.org/docs#quick-start) or the [tutorial video](https://youtu.be/xEVg9dcJMkw).
