@@ -19,7 +19,7 @@ cp .env.example .env
 
 3. Get an API key from the [ARC-AGI-3 Website](https://three.arcprize.org/) and set it as an environment variable in your .env file.
 
-```bash
+```env
 export ARC_API_KEY="6611b1a63a0952268a3f44fdb724c1f2"
 ```
 
