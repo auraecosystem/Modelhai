@@ -1,0 +1,52 @@
+---
+title: 'modelhai'
+author: 'seriki yakub'
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    number_sections: true
+    toc: true
+---
+
+## Importing packages
+
+This R environment comes with many helpful analytics packages installed
+It is defined by the kaggle/rstats Docker image: https://github.com/kaggle/docker-rstats
+For example, here's a helpful package to load
+
+```{r}
+library(tidyverse) # metapackage of all tidyverse packages
+```
+
+## Running code
+
+In a notebook, you can run a single code cell by clicking in the cell and then hitting 
+the blue arrow to the left, or by clicking in the cell and pressing Shift+Enter. In a script, 
+you can run code by highlighting the code you want to run and then clicking the blue arrow
+at the bottom of this window.
+
+## Reading in files
+
+Input data files are available in the read-only "../input/" directory
+For example, running the code below will list all files under the input directory
+
+```{r}
+list.files(path = "../input")
+```
+
+## Saving data
+
+You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved 
+as output when you create a version using "Save & Run All" 
+You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
+
+## Plotting data and output visuals
+
+Rmarkdown scripts can display plots inline with the flow of the analysis. Here is an example for an in-built dataset:
+
+```{r}
+mtcars %>% 
+  ggplot(aes(hp, mpg)) +
+  geom_point() +
+  labs(x = "Horse Power", y = "Miles per Gallon", title = "Car Parameters")
+```
