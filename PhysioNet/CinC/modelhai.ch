@@ -760,22 +760,70 @@ def FCN_Encoder_demo():
     return model
 
 
-def compute_challenge_metric_for_opt(labels, outputs):
-    classes=['10370003','111975006','164889003','164890007','164909002','164917005','164934002','164947007','17338001',
- '251146004','270492004','284470004','39732003','426177001','426627000','426783006','427084000','427172004','427393009','445118002','47665007','59118001',
- '59931005','63593006','698252002','713426002','713427006']
+def compute_challenge_metric_for_opt(labels, outputs, weight_matrix=None):
+    """
+    Computes the PhysioNet/CinC 2020 evaluation challenge metric for multi-label ECG classification.
+    
+    Parameters:
+        labels (np.ndarray): Binary matrix (N, 27) of ground truth target labels.
+        outputs (np.ndarray): Binary matrix (N, 27) of model predictions (0 or 1).
+        weight_matrix (np.ndarray, optional): Preloaded 27x27 weight matrix. If None, uses identity matrix.
+        
+    Returns:
+        float: Normalized challenge score.
+    """
+    classes = [
+        '10370003', '111975006', '164889003', '164890007', '164909002', 
+        '164917005', '164934002', '164947007', '17338001', '251146004', 
+        '270492004', '284470004', '39732003', '426177001', '426627000', 
+        '426783006', '427084000', '427172004', '427393009', '445118002', 
+        '47665007', '59118001', '59931005', '63593006', '698252002', 
+        '713426002', '713427006'
+    ]
+    num_classes = len(classes)
+    
+    labels = np.asarray(labels, dtype=np.bool_)
+    outputs = np.asarray(outputs, dtype=np.bool_)
 
-    '''
-    24 classes
-    ['10370003', '111975006', '164889003', '164890007', '164909002', '164917005',
-      '164934002', '164947007', '17338001', '251146004', '270492004', '39732003',
-      '426177001', '426627000', '426783006' ,'427084000' ,'427393009', '445118002',
-      '47665007' ,'59118001', '59931005', '63593006', '698252002', '713426002']
+    # Default to identity matrix if custom weights are not supplied
+    if weight_matrix is None:
+        weights = np.eye(num_classes, dtype=np.float64)
+    else:
+        weights = np.asarray(weight_matrix, dtype=np.float64)
 
-    
-      
-    '''
+    # Compute modified multi-label confusion matrix
+    A = np.zeros((num_classes, num_classes), dtype=np.float64)
+    for i in range(labels.shape[0]):
+        true_idx = np.where(labels[i, :])[0]
+        pred_idx = np.where(outputs[i, :])[0]
+        if len(true_idx) > 0 and len(pred_idx) > 0:
+            for t in true_idx:
+                for p in pred_idx:
+                    A[t, p] += 1.0 / (len(true_idx) * len(pred_idx))
 
-    normal_class = '426783006'
-    weights = np.array([[1.    , 0.425 , 0.375 , 0.375 , 0.4   , 0.275 , 0.375 , 0.425 ,
-     
+    # Compute raw score
+    s_raw = np.sum(weights * A)
+
+    # Compute maximum achievable score (perfect classification)
+    A_max = np.zeros((num_classes, num_classes), dtype=np.float64)
+    for i in range(labels.shape[0]):
+        true_idx = np.where(labels[i, :])[0]
+        if len(true_idx) > 0:
+            for t in true_idx:
+                A_max[t, t] += 1.0 / len(true_idx)
+    s_max = np.sum(weights * A_max)
+
+    # Inactive baseline (all zeros)
+    s_inactive = 0.0
+
+    if s_max == s_inactive:
+        return 0.0
+
+    # Normalized score
+    return float((s_raw - s_inactive) / (s_max - s_inactive))
+
+# In residual_network_1d():
+output_layer = keras.layers.Dense(27, activation='sigmoid')(gap_layer)
+
+# In residual_network_1d_demo():
+output_layer = keras.layers.Dense(27, activation='sigmoid')(gap_layer)
